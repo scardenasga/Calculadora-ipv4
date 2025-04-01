@@ -1,1 +1,23 @@
 /* You can add global styles to this file, and also import other style files */
+html {
+    box-sizing: border-box;
+    background-color: #F8F3D9;
+  }
+  *, *:before, *:after {
+    box-sizing: inherit;
+  }
+  
+
+  @font-face {
+    font-family: 'SourGummy';
+    src: url('/SourGummy-VariableFont_wdth,wght.ttf') format('truetype'); /* Fuente normal */
+    font-weight: normal;
+    font-style: normal;
+  }
+  
+  @font-face {
+    font-family: 'SourGummy-italic';
+    src: url('/SourGummy-Italic-VariableFont_wdth,wght.ttf') format('truetype'); /* Fuente itálica */
+    font-weight: normal;
+    font-style: italic;
+  }

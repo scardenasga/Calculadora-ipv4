@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { Ipv4CalculatorComponentComponent } from "./components/ipv4-calculator-component/ipv4-calculator-component.component";
 
 @Component({
   selector: 'app-root',
@@ -8,5 +9,5 @@ import { RouterOutlet } from '@angular/router';
   styleUrl: './app.component.css'
 })
 export class AppComponent {
-  title = 'calculadora-ipv4';
+  title = 'Calculadora IP V4';
 }

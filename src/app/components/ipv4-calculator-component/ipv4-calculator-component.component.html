@@ -1,0 +1,145 @@
+<div class="ip-calculator-container">
+  <h1>Calculadora de IP v4</h1>
+
+  <div class="contenedor-principal">
+    
+    <!-- ingreso de datos -->
+    <div class="input-container">
+      <div class="form-group">
+        <label for="ip-address">Dirección IP:</label>
+        <input 
+        type="text" 
+        id="ip-address" 
+        [(ngModel)]="ipAddress" 
+        placeholder="Ej: 192.168.0.1"
+        pattern="^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
+        />
+      </div>
+      
+      <div class="form-group">
+        <label for="subnet-mask">Máscara de Subred:</label>
+        <input 
+        type="text" 
+        id="subnet-mask" 
+        [(ngModel)]="subnetMask" 
+        placeholder="Ej: 255.255.255.0"
+        pattern="^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
+        />
+      </div>
+      
+      <button class="calculate-btn" (click)="calculateIp()">Calcular</button>
+    </div>
+
+    <!-- mostrar errores -->
+    @if (error) {
+    <div class="error-message">
+      {{ error }}
+    </div>
+    }
+
+    <!-- Contenedor flexible para resultados -->
+    @if (ipInfo) {
+    <div class="results-flex-container">
+      <!-- Sección de resultados principal -->
+      <div class="results-container">
+        <h2>Resultados:</h2>
+        
+        <div class="result-item">
+          <span class="label">IP de Red:</span>
+          <span class="value">{{ ipInfo.networkIp }}</span>
+        </div>
+        
+        <div class="result-item">
+          <span class="label">IP de Broadcast:</span>
+          <span class="value">{{ ipInfo.broadcastIp }}</span>
+        </div>
+        
+        <div class="result-item">
+          <span class="label">Cantidad de Hosts Útiles:</span>
+          <span class="value">{{ ipInfo.hostsCount }}</span>
+        </div>
+        
+        <div class="result-item">
+          <span class="label">Rango de IPs Útiles:</span>
+          <span class="value">{{ ipInfo.usableRange }}</span>
+        </div>
+        
+        <div class="result-item">
+          <span class="label">Clase de IP:</span>
+          <span class="value">{{ ipInfo.ipClass }}</span>
+        </div>
+        
+        <div class="result-item">
+          <span class="label">Tipo de IP:</span>
+          <span class="value">{{ ipInfo.isPrivate ? 'Privada' : 'Pública' }}</span>
+        </div>
+
+        <div class="binary-representation">
+          <h3>Representación Binaria:</h3>
+          
+          <div class="binary-container">
+            <div class="binary-label">IP y Máscara:</div>
+            <div class="binary-value">
+              
+              <!-- Representación visual con colores en una sola línea -->
+              <div class="binary-colored">
+                <span 
+                  *ngFor="let bit of ipInfo.binaryRepresentation.ip.split(''); let i = index" 
+                  [ngClass]="getColorClass(i)"
+                  class="binary-bit"
+                  [style.animation-delay]="(i * 0.01) + 's'"
+                >{{ bit }}</span>
+              </div>
+              
+              <!-- Espacios entre octetos para facilitar lectura (ahora separado) -->
+              <div class="binary-formatted">
+                {{ formatBinary(ipInfo.binaryRepresentation.ip) }}
+              </div>
+            </div>
+          </div>
+          
+          <div class="binary-legend">
+            <div class="legend-item">
+              <span class="legend-color network-bit"></span>
+              <span class="legend-text">Red</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-color host-bit"></span>
+              <span class="legend-text">Host</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- Sección de n-ésima IP útil (ahora separada del contenedor de resultados) -->
+      <div class="nth-ip-container">
+        <h3>Encontrar n-ésima IP útil</h3>
+        
+        <div class="nth-ip-form">
+          <label for="nth-ip">Número de IP (1-{{ ipInfo.hostsCount }}):</label>
+          <input
+            type="number"
+            id="nth-ip"
+            [(ngModel)]="nthIpNumber"
+            min="1"
+            [max]="ipInfo.hostsCount"
+            class="nth-ip-input"
+          />
+          <button class="calculate-btn" (click)="calculateNthIp()">Encontrar</button>
+        </div>
+        
+        <div class="error-message" *ngIf="nthIpError">
+          {{ nthIpError }}
+        </div>
+        
+        <div *ngIf="nthIp" class="result-item">
+          <span class="label">IP útil # {{ nthIpNumber }}</span>
+          <span class="value nth-ip-result">{{ nthIp }}</span>
+        </div>
+
+      </div>
+    </div>
+    }
+  </div>
+</div>
