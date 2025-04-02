@@ -12,7 +12,7 @@ import { FormsModule } from '@angular/forms';
 })
 export class Ipv4CalculatorComponentComponent {
   ipAddress: string = '';
-  subnetMask: string | number = 0;
+  subnetMask: string | number = '';
   ipInfo: any = null;
   error: string = '';
 
