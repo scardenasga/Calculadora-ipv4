@@ -26,9 +26,32 @@ export class CalculatorIpv4Service {
   }
 
   /**
+   * Convierte una máscara en formato decimal (e.g., 24) al formato de dirección IP (e.g., 255.255.255.0)
+   */
+  decimalMaskToIp(mask: number): string {
+    if (mask < 0 || mask > 32) {
+      throw new Error('La máscara debe estar en el rango de 0 a 32');
+    }
+
+    const binaryMask = '1'.repeat(mask).padEnd(32, '0'); // Crear la máscara binaria
+    const octets = [];
+
+    for (let i = 0; i < 32; i += 8) {
+      const octet = binaryMask.substring(i, i + 8); // Dividir en bloques de 8 bits
+      octets.push(parseInt(octet, 2)); // Convertir cada bloque a decimal
+    }
+
+    return octets.join('.'); // Unir los octetos con puntos
+  }
+  /**
    * Valida que la máscara tenga un formato correcto
    */
-  isValidMask(mask: string): boolean {
+  isValidMask(mask: string | number): boolean {
+    if (typeof mask === 'number') {
+      // Validar si el número está en el rango válido (0-32)
+      return mask >= 0 && mask <= 32;
+    }
+
     if (!this.isValidIp(mask)) {
       return false;
     }
@@ -170,9 +193,11 @@ export class CalculatorIpv4Service {
   /**
    * Convierte una dirección IP a un número decimal
    */
-   ipToDecimalNumber(ip: string): number {
-    const octets = ip.split('.').map(octet => parseInt(octet, 10));
-    return (octets[0] * 16777216) + (octets[1] * 65536) + (octets[2] * 256) + octets[3];
+  ipToDecimalNumber(ip: string): number {
+    const octets = ip.split('.').map((octet) => parseInt(octet, 10));
+    return (
+      octets[0] * 16777216 + octets[1] * 65536 + octets[2] * 256 + octets[3]
+    );
   }
 
   /**
@@ -185,7 +210,7 @@ export class CalculatorIpv4Service {
     const octet4 = Math.floor(num) % 256;
     return `${octet1}.${octet2}.${octet3}.${octet4}`;
   }
-  
+
   /**
    * Obtiene la n-ésima IP útil en la red
    * @param networkIp IP de red
@@ -193,32 +218,36 @@ export class CalculatorIpv4Service {
    * @param n Número de la IP útil que se desea (1-based, la primera IP útil es n=1)
    * @returns La n-ésima IP útil o null si está fuera de rango
    */
-    getNthUsableIp(networkIp: string, broadcastIp: string, n: number): string | null {
-      if (n < 1) {
-        return null;
-      }
-      
-      const firstUsableIp = this.getFirstUsableIp(networkIp);
-      const firstIpValue = this.ipToDecimalNumber(firstUsableIp);
-      
-      const lastUsableIp = this.getLastUsableIp(broadcastIp);
-      const lastIpValue = this.ipToDecimalNumber(lastUsableIp);
-      
-      const totalUsable = lastIpValue - firstIpValue + 1;
-      
-      if (n > totalUsable) {
-        return null;
-      }
-      
-      // Calcular la n-ésima IP sumando n-1 a la primera IP útil
-      const nthIpValue = firstIpValue + (n - 1);
-      return this.decimalNumberToIp(nthIpValue);
+  getNthUsableIp(
+    networkIp: string,
+    broadcastIp: string,
+    n: number
+  ): string | null {
+    if (n < 1) {
+      return null;
     }
+
+    const firstUsableIp = this.getFirstUsableIp(networkIp);
+    const firstIpValue = this.ipToDecimalNumber(firstUsableIp);
+
+    const lastUsableIp = this.getLastUsableIp(broadcastIp);
+    const lastIpValue = this.ipToDecimalNumber(lastUsableIp);
+
+    const totalUsable = lastIpValue - firstIpValue + 1;
+
+    if (n > totalUsable) {
+      return null;
+    }
+
+    // Calcular la n-ésima IP sumando n-1 a la primera IP útil
+    const nthIpValue = firstIpValue + (n - 1);
+    return this.decimalNumberToIp(nthIpValue);
+  }
 
   /**
    * Calcula toda la información relacionada con una dirección IP y su máscara
    */
-  calculateIpInfo(ip: string, mask: string): IpInfo {
+  calculateIpInfo(ip: string, mask: string | number): IpInfo {
     // Validar formato de IP y máscara
     if (!this.isValidIp(ip) || !this.isValidMask(mask)) {
       throw new Error('Formato de IP o máscara inválido');
@@ -226,7 +255,19 @@ export class CalculatorIpv4Service {
 
     // Convertir IP y máscara a formato binario
     const ipBinary = this.ipToBinary(ip);
-    const maskBinary = this.ipToBinary(mask);
+
+    let ipmask: string;
+    let maskBinary: string;
+
+    if (typeof mask === 'number') {
+      // Si la máscara es un número, convertirla a formato IP y luego a binario
+      ipmask = this.decimalMaskToIp(mask);
+      maskBinary = this.ipToBinary(ipmask);
+    } else {
+      // Si la máscara ya está en formato IP, convertirla directamente a binario
+      ipmask = mask;
+      maskBinary = this.ipToBinary(mask);
+    }
 
     // Obtener bits de red y host
     const networkBits = this.countNetworkBits(maskBinary);
@@ -240,7 +281,13 @@ export class CalculatorIpv4Service {
     const broadcastIpDecimal = this.binaryToIp(broadcastIp);
 
     // Calcular cantidad de hosts
-    const hostsCount = Math.pow(2, 32 - networkBits) - 2;
+    let hostsCount: number;
+
+    if (networkBits === 32) {
+      hostsCount = 0; // No hay hosts utilizables en /31
+    } else {
+      hostsCount = Math.pow(2, 32 - networkBits) - 2; // Calcular normalmente para otras máscaras
+    }
 
     // Calcular rango de IPs útiles
     const firstUsableIp = this.getFirstUsableIp(networkIpDecimal);
@@ -257,9 +304,9 @@ export class CalculatorIpv4Service {
 
     return {
       ip,
-      mask,
-      networkIp: networkIpDecimal,
-      broadcastIp: broadcastIpDecimal,
+      mask: ipmask,
+      networkIp: `${networkIpDecimal} / ${networkBits}`,
+      broadcastIp: `${broadcastIpDecimal} / ${networkBits}`,
       hostsCount,
       usableRange: `${firstUsableIp}-${lastUsableIp}`,
       firstUsableIp,

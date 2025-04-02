@@ -23,7 +23,7 @@
         id="subnet-mask" 
         [(ngModel)]="subnetMask" 
         placeholder="Ej: 255.255.255.0"
-        pattern="^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
+        pattern="^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$|^([0-9]|[12][0-9]|3[0-2])$"
         />
       </div>
       
@@ -50,7 +50,7 @@
         </div>
         
         <div class="result-item">
-          <span class="label">IP de Broadcast:</span>
+        <span class="label">IP de Broadcast:</span>
           <span class="value">{{ ipInfo.broadcastIp }}</span>
         </div>
         
@@ -87,7 +87,7 @@
                   *ngFor="let bit of ipInfo.binaryRepresentation.ip.split(''); let i = index" 
                   [ngClass]="getColorClass(i)"
                   class="binary-bit"
-                  [style.animation-delay]="(i * 0.01) + 's'"
+                  [style.animation-delay]="(i * 0.03) + 's'"
                 >{{ bit }}</span>
               </div>
               

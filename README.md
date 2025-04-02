@@ -1,59 +1,134 @@
-# CalculadoraIpv4
+# Calculadora Ipv4
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.2.5.
+El siguiente proyecto consiste en el desarrollo de una pagina web para mostrar el funcionamiento de una calculadora ipv4
 
-## Development server
+## Tabla de Contenidos
 
-To start a local development server, run:
+- [Descripción](#descripción)
+- [Requisitos Previos](#requisitos-previos)
+- [Instalación](#instalación)
+- [Despliegue](#despliegue)
 
-```bash
-ng serve
-```
+## Descripción
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+El proyecto consisten en la eleaboracion de una calculadora Ipv4 con el fin de desarrollar los siguiente puntos
+1. Seleccionar una ip y una mascara
+2. Determinar la ip de red
+3. Determinar la ip de broadcast
+4. Determinnar el numero de host disponibles
+5. Determinar el rango de ip´s utiles
+6. Determinar la calse de la ip
+7. Determinar si la red es publica o privada
+8. Visualizar la ip con cun resaltado teniendo encuenta la mascara
+9. Determinar cual es le n-esima ip
 
-## Code scaffolding
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+## Requisitos Previos
 
-```bash
-ng generate component component-name
-```
+Antes de comenzar, asegúrate de tener instalados los siguientes programas:
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+- [Node.js](https://nodejs.org/) (v20.12.2)
+- [npm](https://www.npmjs.com/) (se instala con Node.js)
+- [Angular CLI](https://angular.io/cli) (`npm install -g @angular/cli`)
 
-```bash
-ng generate --help
-```
+## Instalación
 
-## Building
+1. Clona el repositorio:
 
-To build the project run:
+   ```bash
+   git clone [https://github.com/sindresorhus/del](https://github.com/sindresorhus/del)
+   cd calculadora-ipv4
 
-```bash
-ng build
-```
+## Despliegue
+# Despliegue de Aplicación Angular en Rocky Linux con Http-server
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+Este documento describe los pasos necesarios para desplegar una aplicación Angular en un servidor Rocky Linux utilizando Http-server como servidor
 
-## Running unit tests
 
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
 
-```bash
-ng test
-```
+## Pasos de despliegue
 
-## Running end-to-end tests
+1.  **Actualizar el sistema:**
 
-For end-to-end (e2e) testing, run:
+    ```bash
+    sudo dnf update -y
+    ```
+    ![Actualizar Paquetes de Rocky](./imagenes/actulizar%20paquetes.png)
 
-```bash
-ng e2e
-```
+2. **Intalar Herramientas**
+    ```
+    node --version
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+    ```
+    Instalamos git para poder acceder al repositorio del proyecto
 
-## Additional Resources
+    ![Instalar Herramientas](./imagenes/Instalar%20Git.png)
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+    Intalamos la herramienta fnm que facilita la intalacion de node.js segun manual de descarga</br>
+    [Instalacion de Node.JS](https://nodejs.org/es/download)
+
+    ![Instalar Herramientas](./imagenes/Intalar%20fnm.png)
+
+    Una vez instalada la herramienta fnm actualizamos el archivo **.bashrc** para que se registren los cambios
+    ```
+    source .bashrc
+    fnm --version
+    fnm install 22
+    node --vesrion
+    npm --version
+    npm install -g @angular/cli
+    ng version
+    ```
+    ![Instalar Herramientas](./imagenes/Instalar%20Angular.png)
+
+
+3.  **Construir la aplicación Angular:**
+
+
+    El proyecto se encuentra en el siguiente repositorio https://github.com/scardenasga/Calculadora-ipv4.git
+    ```
+        git --version
+        git clone https://github.com/scardenasga/Calculadora-ipv4.git
+    ```
+    ![Clonar Repositorio](./imagenes/ubicar%20proyecto%20en%20git.png)
+    Esto nos permitira instalar las dependencias faltantes y verificar que el sistema funciona
+     ```
+        npm install
+        ng serve
+    ```
+    ![Encontrar Proyecto](./imagenes/iniciar%20proyecto.png)
+
+    Una vez verificamos que el programa funciona podemos ejecutar el comando para construir el proyecto y solamente cargar en el sevirdor la caprte que nos genera 
+    ```
+        ng build --configuration production
+    ```
+    ![Construir Proyecto](./imagenes/crear%20ejecutable.png)
+
+4.  **Instalacion del Servidor**
+    En este caso realizaremos la intalación de **http-server** auque tambien se puede utilizar **nginx** pero debido a dificultades encontradas en su implementación este manual utilizara la primera opcion
+    ```
+        npm install -g http-server
+    ```
+    ![Instalar servidor](./imagenes/Instalar%20Servidor.png)
+
+    Una vez tenemos la herramienta instalada podemos ejecutar el siguiente proyecto en la raiz del proyecto
+    ```
+    http-server -d 0.0.0.0 -p 8080
+    ```
+    ![Ejecutar Servidor](./imagenes/Ejecucion%20Servidor.png)
+
+5.  **Configurar el firewall:**
+
+    * Abre el puerto 80 en el firewall:
+
+    ```bash
+        sudo firewall-cmd --permanent --add-service=http
+        sudo firewall-cmd --reload
+    ```
+    ![Abrir Firewall](./imagenes/Desactivar%20Firewall.png)
+
+
+
+## Notas importantes
+
+* La carpeta `dist` contiene los archivos estáticos de tu aplicación. aunque en este caso el sistema los almacena en en la siguiente ruta `dist\calculadora-ipv4\browser\index.html`

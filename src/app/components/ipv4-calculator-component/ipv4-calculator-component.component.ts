@@ -8,12 +8,11 @@ import { FormsModule } from '@angular/forms';
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './ipv4-calculator-component.component.html',
-  styleUrl: './ipv4-calculator-component.component.css'
+  styleUrl: './ipv4-calculator-component.component.css',
 })
 export class Ipv4CalculatorComponentComponent {
-
   ipAddress: string = '';
-  subnetMask: string = '';
+  subnetMask: string | number = 0;
   ipInfo: any = null;
   error: string = '';
 
@@ -27,22 +26,29 @@ export class Ipv4CalculatorComponentComponent {
   calculateIp() {
     try {
       this.error = '';
-      this.ipInfo = this.ipService.calculateIpInfo(this.ipAddress, this.subnetMask);
-    
+      // Convertir la máscara a número si es posible
+      const mask =
+        typeof this.subnetMask === 'string' && !isNaN(Number(this.subnetMask))
+          ? Number(this.subnetMask)
+          : this.subnetMask;
+
+      this.ipInfo = this.ipService.calculateIpInfo(
+        this.ipAddress,
+        mask
+      );
+
       // Resetear la n-ésima IP
       this.nthIp = null;
       this.nthIpError = '';
       this.nthIpNumber = 1;
-    
     } catch (err: any) {
       this.error = err.message;
       this.ipInfo = null;
     }
   }
 
-
-   // Método para obtener la n-ésima IP útil
-   calculateNthIp() {
+  // Método para obtener la n-ésima IP útil
+  calculateNthIp() {
     if (!this.ipInfo) {
       this.nthIpError = 'Primero debe calcular la información de la IP';
       return;
@@ -51,11 +57,11 @@ export class Ipv4CalculatorComponentComponent {
     try {
       this.nthIpError = '';
       this.nthIp = this.ipService.getNthUsableIp(
-        this.ipInfo.networkIp, 
-        this.ipInfo.broadcastIp, 
+        this.ipInfo.networkIp,
+        this.ipInfo.broadcastIp,
         this.nthIpNumber
       );
-      
+
       if (this.nthIp === null) {
         this.nthIpError = `El número debe estar entre 1 y ${this.ipInfo.hostsCount}`;
       }
@@ -65,13 +71,12 @@ export class Ipv4CalculatorComponentComponent {
     }
   }
 
-  
   // Método para colorear los bits según red, subred y host
   getColorClass(index: number): string {
     if (!this.ipInfo) return '';
-    
+
     const networkBits = this.ipInfo.binaryRepresentation.colored.red.length;
-    
+
     if (index < networkBits) {
       return 'network-bit';
     } else {
